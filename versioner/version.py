@@ -3,6 +3,7 @@ import yaml
 from rdflib import Graph, URIRef, Literal
 from fastprogress.fastprogress import progress_bar
 from tqdm import tqdm
+import argparse
 
 
 class ImportVersioner:
@@ -56,8 +57,14 @@ class ImportVersioner:
 
 
 if __name__ == "__main__":
-    my_yaml = "utk.yml"
-    output = "output"
-    sheet = "sheets/kintner_with_collections.csv"
-    x = ImportVersioner(sheet, output, my_yaml)
-
+    import argparse
+    parser = argparse.ArgumentParser(description='Generate RDF about a work from a Bulkrax Import CSV.')
+    parser.add_argument("-s", "--sheet", dest="sheet", help="Path to your importer CSV", required=True)
+    parser.add_argument("-p", "--profile", dest="profile", help="Path to m3 profile.", required=True)
+    parser.add_argument("-o", "--output", dest="output", help="Path to where to save your rdf files.", required=True)
+    args = parser.parse_args()
+    x = ImportVersioner(
+        import_sheet=args.sheet,
+        output_directory=args.output,
+        profile=args.profile
+    )
