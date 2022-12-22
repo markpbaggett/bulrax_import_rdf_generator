@@ -34,27 +34,27 @@ class ImportVersioner:
 
     def __create_metadata_file(self, row):
         g = Graph()
+        source_identifier = row['source_identifier']
         for k, v in progress_bar(row.items()):
-            for key, value in self.profile_as_yaml.items():
-                if k == key:
-                    if v != "":
-                        values_to_mint = v.split(' | ')
-                        for new_value in values_to_mint:
-                            if new_value.startswith('http'):
-                                minted_object = URIRef(new_value)
-                            else:
-                                minted_object = Literal(new_value)
-                            g.add(
-                                (
-                                    URIRef(f"{self.uri_pattern_for_subjects}{row['source_identifier']}"),
-                                    URIRef(value['property_uri']),
-                                    minted_object
-                                )
-                            )
-                with open(f"{self.output}/{row['source_identifier']}{self.extension}", 'wb') as rdf:
-                    rdf.write(
-                        g.serialize(format=self.serialization, indent=4).encode("utf-8")
+            if v != "" and k in self.profile_as_yaml:
+                property = self.profile_as_yaml[k]['property_uri']
+                values_to_mint = v.split(' | ')
+                for new_value in values_to_mint:
+                    if new_value.startswith('http'):
+                        minted_object = URIRef(new_value)
+                    else:
+                        minted_object = Literal(new_value)
+                    g.add(
+                        (
+                            URIRef(f"{self.uri_pattern_for_subjects}{row['source_identifier']}"),
+                            URIRef(property),
+                            minted_object
+                        )
                     )
+        with open(f"{self.output}/{source_identifier}{self.extension}", 'wb') as rdf:
+            rdf.write(
+                g.serialize(format=self.serialization, indent=4).encode("utf-8")
+            )
         return
 
     @staticmethod
